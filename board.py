@@ -81,8 +81,8 @@ class Board:
         if self.board[x][y].mine:
             return False
         self.board[x][y].revealed = True
-        if self.board[x][y].value == 0:
-            self._reveal_neighbors(x, y)
+        # if self.board[x][y].value == 0:
+        #     self._reveal_neighbors(x, y)
         return True
 
     def _reveal_neighbors(self, x: int, y: int) -> None:
