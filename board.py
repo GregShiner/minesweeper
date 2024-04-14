@@ -32,7 +32,8 @@ class Square:
 
 
 class Board:
-    def __init__(self, size, num_mines):
+    def __init__(self, size: int, num_mines: int):
+        """Initializes the board with the given size (n x n) and number of mines"""
         self.size = size
         self.num_mines = num_mines
         self.board = [[Square(x, y) for y in range(size)] for x in range(size)]
@@ -84,7 +85,7 @@ class Board:
             self._reveal_neighbors(x, y)
         return True
 
-    def _reveal_neighbors(self, x, y):
+    def _reveal_neighbors(self, x: int, y: int) -> None:
         """Recursively reveals neighbors of a square with no adjacent mines"""
         raise NotImplementedError
 
