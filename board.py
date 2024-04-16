@@ -85,8 +85,15 @@ class Board:
         #     self._reveal_neighbors(x, y)
         return True
 
-    def _reveal_neighbors(self, x: int, y: int) -> None:
-        """Recursively reveals neighbors of a square with no adjacent mines"""
+    def _reveal_neighbors(self, x: int, y: int) -> bool:
+        """Recursively reveals neighbors of a square with no adjacent mines
+        Check if current square is a mine, if so, return False
+        Check if current square is already revealed, if so, return True
+        Check if current square is flagged, if so, return True
+        Set current square to revealed
+        If current square value is 0 (has no adjacent mines), recursively call on all unrevealed neighbors
+        Return True
+        """
         raise NotImplementedError
 
     def left_click(self, x: int, y: int) -> bool:
@@ -96,7 +103,9 @@ class Board:
             return True
         if self.board[x][y].flagged:
             return True
+        # Comment this line and uncomment the next line to implement the recursive reveal
         return self._reveal(x, y)
+        # return self._reveal_neighbors(x, y)
 
     def right_click(self, x: int, y: int) -> None:
         """Toggles the flagged status of the square"""
