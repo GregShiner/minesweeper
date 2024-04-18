@@ -14,7 +14,7 @@ class Square:
         if self.flagged:
             return "F"
         elif not self.revealed:
-            return " "
+            return "\u2588"
         elif self.mine:
             return "X"
         else:
@@ -40,6 +40,14 @@ class Board:
         self.mines = []
         self._generate_mines()
         self._generate_board()
+
+    def __str__(self):
+        vis_board = ""
+        for x in range(self.size):
+            for y in range(self.size):
+                vis_board += str(self.board[x][y]) + " "
+            vis_board += "\n"
+        return vis_board
 
     def _generate_mines(self) -> None:
         """Generates the mines randomly"""
@@ -78,14 +86,15 @@ class Board:
 
     def _reveal(self, x: int, y: int) -> bool:
         """Returns False if the player clicked on a mine, True otherwise"""
+        self.board[x][y].revealed = True
         if self.board[x][y].mine:
             return False
-        self.board[x][y].revealed = True
-        # if self.board[x][y].value == 0:
-        #     self._reveal_neighbors(x, y)
+        # self.board[x][y].revealed = True
+        if self.board[x][y].value == 0:
+            self._reveal_neighbors(x, y)
         return True
 
-    def _reveal_neighbors(self, x: int, y: int) -> bool:
+    def _reveal_neighbors(self, x: int, y: int) -> None:
         """Recursively reveals neighbors of a square with no adjacent mines
         Check if current square is a mine, if so, return False
         Check if current square is already revealed, if so, return True
@@ -94,7 +103,11 @@ class Board:
         If current square value is 0 (has no adjacent mines), recursively call on all unrevealed neighbors
         Return True
         """
-        raise NotImplementedError
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                if i in range(self.size) and j in range(self.size):
+                    if self.board[i][j].value == 0 and not self.board[i][j].revealed:
+                        self._reveal(i, j)
 
     def left_click(self, x: int, y: int) -> bool:
         """Returns False if the player clicked on a mine, True otherwise
@@ -103,9 +116,7 @@ class Board:
             return True
         if self.board[x][y].flagged:
             return True
-        # Comment this line and uncomment the next line to implement the recursive reveal
         return self._reveal(x, y)
-        # return self._reveal_neighbors(x, y)
 
     def right_click(self, x: int, y: int) -> None:
         """Toggles the flagged status of the square"""
