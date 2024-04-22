@@ -29,6 +29,7 @@ class Square:
         if self.revealed:
             debug_str += "R"
         debug_str += f" {self.value}"
+        return debug_str
 
 
 class Board:
@@ -80,34 +81,34 @@ class Board:
                 if i == 0 and j == 0:
                     continue
                 if x + i >= 0 and x + i < self.size and y + j >= 0 and y + j < self.size:
-                    if self.board[x+i][y+j].mine:
+                    if (x + i, y + j) in self.mines:
                         count += 1
         return count
 
-    def _reveal(self, x: int, y: int) -> bool:
-        """Returns False if the player clicked on a mine, True otherwise"""
-        self.board[x][y].revealed = True
-        if self.board[x][y].mine:
-            return False
-        # self.board[x][y].revealed = True
-        if self.board[x][y].value == 0:
-            self._reveal_neighbors(x, y)
-        return True
-
-    def _reveal_neighbors(self, x: int, y: int) -> None:
+    def _reveal_neighbors(self, x: int, y: int) -> bool:
         """Recursively reveals neighbors of a square with no adjacent mines
         Check if current square is a mine, if so, return False
         Check if current square is already revealed, if so, return True
         Check if current square is flagged, if so, return True
         Set current square to revealed
-        If current square value is 0 (has no adjacent mines), recursively call on all unrevealed neighbors
-        Return True
+        If current square has adjacent mines, return True to stop recursion
+        Recursively reveal neighbors of the current square
         """
+        ret_val = True
+        if self.board[x][y].mine:
+            return False
+        if self.board[x][y].revealed:
+            return True
+        if self.board[x][y].flagged:
+            return True
+        self.board[x][y].revealed = True
+        if self.board[x][y].value != 0:
+            return True
         for i in range(x - 1, x + 2):
             for j in range(y - 1, y + 2):
                 if i in range(self.size) and j in range(self.size):
-                    if self.board[i][j].value == 0 and not self.board[i][j].revealed:
-                        self._reveal(i, j)
+                    ret_val = self._reveal_neighbors(i, j) and ret_val
+        return ret_val
 
     def left_click(self, x: int, y: int) -> bool:
         """Returns False if the player clicked on a mine, True otherwise
@@ -116,7 +117,7 @@ class Board:
             return True
         if self.board[x][y].flagged:
             return True
-        return self._reveal(x, y)
+        return self._reveal_neighbors(x, y)
 
     def right_click(self, x: int, y: int) -> None:
         """Toggles the flagged status of the square"""
