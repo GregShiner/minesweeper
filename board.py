@@ -96,14 +96,14 @@ class Board:
         Recursively reveal neighbors of the current square
         """
         ret_val = True
-        if self.board[x][y].mine:
-            return False
         if self.board[x][y].revealed:
-            return True
-        if self.board[x][y].flagged:
             return True
         self.board[x][y].revealed = True
         self.num_revealed += 1  # advances toward win condition
+        if self.board[x][y].mine:
+            return False
+        if self.board[x][y].flagged:
+            return True
         if self.board[x][y].value != 0:
             return True
         for i in range(x - 1, x + 2):
@@ -114,9 +114,10 @@ class Board:
 
     def left_click(self, x: int, y: int) -> bool:
         """Returns False if the player clicked on a mine, True otherwise
-        Does nothing if the square is already revealed or flagged"""
+        Does nothing if the square is already flagged
+        Runs chord function if the square is already revealed"""
         if self.board[x][y].revealed:
-            return True
+            return self._chord(x, y)
         if self.board[x][y].flagged:
             return True
         return self._reveal_neighbors(x, y)
@@ -124,3 +125,26 @@ class Board:
     def right_click(self, x: int, y: int) -> None:
         """Toggles the flagged status of the square"""
         self.board[x][y].flagged = not self.board[x][y].flagged
+
+    def _count_flags(self, x: int, y: int) -> bool:
+        """Checks if there are adjacent flags >= the number of adjacent mines"""
+        flag_count = 0
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                if i in range(self.size) and j in range(self.size):
+                    if self.board[i][j].flagged:
+                        flag_count += 1
+        if flag_count >= self.board[x][y].value:
+            return True
+        return False
+
+    def _chord(self, x: int, y: int) -> bool:
+        """Reveals adjacent non-flagged tiles if enough are flagged"""
+        ret_val = True
+        if self._count_flags(x, y):
+            for i in range(x - 1, x + 2):
+                for j in range(y - 1, y + 2):
+                    if i in range(self.size) and j in range(self.size):
+                        if not self.board[i][j].flagged:
+                            ret_val = self._reveal_neighbors(i, j) and ret_val
+        return ret_val
