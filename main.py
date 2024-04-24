@@ -142,7 +142,8 @@ def main():
         # Display game result
         if game_over:
             if lost or won:
-                display_result("You Lose!", RED if lost else BLUE)
+                display_result("You Lose!" if lost else "You Win!",
+                               RED if lost else BLUE)
 
         pygame.display.update()
         clock.tick(30)  # Cap the frame rate at 30 FPS
